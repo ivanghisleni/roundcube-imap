@@ -228,17 +228,21 @@ class rcube_config
 
         // fix paths
         foreach (['log_dir' => 'logs', 'temp_dir' => 'temp'] as $key => $dir) {
-            foreach ([$this->prop[$key], '../' . $this->prop[$key], RCUBE_INSTALL_PATH . $dir] as $path) {
-                if ($path && ($realpath = realpath(unslashify($path)))) {
-                    $this->prop[$key] = $realpath;
-                    break;
+            if(array_key_exists($key, $this->prop)) {
+                foreach ([$this->prop[$key], '../' . $this->prop[$key], RCUBE_INSTALL_PATH . $dir] as $path) {
+                    if ($path && ($realpath = realpath(unslashify($path)))) {
+                        $this->prop[$key] = $realpath;
+                        break;
+                    }
                 }
             }
         }
 
         // fix default imap folders encoding
         foreach (['drafts_mbox', 'junk_mbox', 'sent_mbox', 'trash_mbox'] as $folder) {
-            $this->prop[$folder] = rcube_charset::convert($this->prop[$folder], RCUBE_CHARSET, 'UTF7-IMAP');
+            if(array_key_exists($folder, $this->prop)) {
+                $this->prop[$folder] = rcube_charset::convert($this->prop[$folder], RCUBE_CHARSET, 'UTF7-IMAP');
+            }
         }
 
         // set PHP error logging according to config
