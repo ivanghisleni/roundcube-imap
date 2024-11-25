@@ -50,20 +50,23 @@ class utils {
             if (preg_match('/^[0-9]+$/', $rangeitem) > 0) {
                 $uidarray[] = $rangeitem;
             } else {
-                $rangestartandend = explode(':', $rangeitem);
-                $rangestart = $rangestartandend[0];
-                $rangeend = $rangestartandend[1];
-                
-                if (preg_match('/^[0-9]+$/', $rangestart) > 0 AND preg_match('/^[0-9]+$/', $rangeend) > 0) {
-                
-                    $i = $rangestart;
-                
-                    while ($i <= $rangeend) {
-                        $uidarray[] = $i;
-                    
-                        $i++;
+                if(!empty($rangeitem)) {
+
+                    $rangestartandend = explode(':', $rangeitem);
+                    $rangestart = $rangestartandend[0];
+                    $rangeend = $rangestartandend[1];
+
+                    if (preg_match('/^[0-9]+$/', $rangestart) > 0 and preg_match('/^[0-9]+$/', $rangeend) > 0) {
+
+                        $i = $rangestart;
+
+                        while ($i <= $rangeend) {
+                            $uidarray[] = $i;
+
+                            $i++;
+                        }
+
                     }
-                    
                 }
                 
             }

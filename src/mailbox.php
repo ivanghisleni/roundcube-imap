@@ -200,8 +200,11 @@ class mailbox {
         
         $qresync   = $this->connection_data["capabilities"]["qresync"];
         $condstore = $this->connection_data["capabilities"]["condstore"];
-        $qresync_enable_failed = $this->connection_data["qresync_enable_failed"];
-        
+        $qresync_enable_failed = '';
+        if(array_key_exists("qresync_enable_failed", $this->connection_data)) {
+            $qresync_enable_failed = $this->connection_data["qresync_enable_failed"];
+        }
+
         $status_object = $this->getStatus();
         
         $uidvalidity = (int) $status_object->uidvalidity;
@@ -267,9 +270,14 @@ class mailbox {
                 
             }
 
+            $vanishedrange = '';
+            if(array_key_exists("VANISHED",$this->rcube_imap_generic->data)) {
+                $vanishedrange = $this->rcube_imap_generic->data['VANISHED'];
+            }
+
             $returnarray["messagearray"] = $messagearray;
-            $returnarray["vanishedarray"] = \bjc\roundcubeimap\utils::decodeMessageRanges($this->rcube_imap_generic->data["VANISHED"]);
-            $returnarray["vanishedrange"] = $this->rcube_imap_generic->data["VANISHED"];
+            $returnarray["vanishedarray"] = \bjc\roundcubeimap\utils::decodeMessageRanges($vanishedrange);
+            $returnarray["vanishedrange"] = $vanishedrange;
             $returnarray["status"] = 1;
             
         }
@@ -335,7 +343,10 @@ class mailbox {
         
         $qresync   = $this->connection_data["capabilities"]["qresync"];
         $condstore = $this->connection_data["capabilities"]["condstore"];
-        $qresync_enable_failed = $this->connection_data["qresync_enable_failed"];
+        $qresync_enable_failed = '';
+        if(array_key_exists("qresync_enable_failed", $this->connection_data)) {
+            $qresync_enable_failed = $this->connection_data["qresync_enable_failed"];
+        }
         
         $status_object = $this->getStatus();
         
