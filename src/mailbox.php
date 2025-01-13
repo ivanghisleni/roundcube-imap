@@ -121,6 +121,11 @@ class mailbox {
         
         $result = $this->rcube_imap_generic->fetchHeaders($this->mailboxname, $message_set, true, $bodystr, $headers);
 
+        // Error on fetching message headers
+        if($result === false) {
+            return [];
+        }
+
         $resultarray = array();
         
         foreach ($result as $rcube_message_header) {
@@ -166,6 +171,10 @@ class mailbox {
         $headers = array_unique(array_merge($headers, $add_headers));
         
         $result = $this->rcube_imap_generic->fetchHeaders($this->mailboxname, $uid, true, $bodystr, $headers);
+        // Error on fetching message headers
+        if($result === false) {
+            return null;
+        }
         
         $rcube_message_header = reset($result);
         
