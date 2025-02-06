@@ -20,7 +20,7 @@ class imap_generic extends \rcube_imap_generic {
      * @return string message data
      */
 
-    public function fetchMimemessage($mailbox, $uid, $readOnly = false) {
+    public function fetchMimemessage($mailbox, $uid, $readOnly = true) {
 
         if (!$this->select($mailbox, null, $readOnly)) {
             return false;

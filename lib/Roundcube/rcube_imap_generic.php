@@ -1193,7 +1193,7 @@ class rcube_imap_generic
      *
      * @return bool True on success, false on error
      */
-    public function select($mailbox, $qresync_data = null, $readOnly =  false)
+    public function select($mailbox, $qresync_data = null, $readOnly = true)
     {
         if (!strlen($mailbox)) {
             return false;
