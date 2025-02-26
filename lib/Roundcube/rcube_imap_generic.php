@@ -1974,14 +1974,15 @@ class rcube_imap_generic
      * @param string $criteria   Searching criteria
      * @param bool   $return_uid Enable UID in result instead of sequence ID
      * @param array  $items      Return items (MIN, MAX, COUNT, ALL)
+     * @param bool  $readOnly    Selecting read-only mode
      *
      * @return rcube_result_index Result data
      */
-    public function search($mailbox, $criteria, $return_uid = false, $items = [])
+    public function search($mailbox, $criteria, $return_uid = false, $items = [], $readOnly = true)
     {
         $old_sel = $this->selected;
 
-        if (!$this->select($mailbox)) {
+        if (!$this->select($mailbox, null, $readOnly)) {
             return new rcube_result_index($mailbox);
         }
 
