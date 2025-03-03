@@ -142,6 +142,9 @@ class mailbox {
 
     /**
      * Expose: Executes SEARCH command by rcube_imap_generic
+     * @param string    $criteria       Criteria
+     * @param bool      $return_uid
+     * @param bool      $readOnly       Selecting read-only mode
      *
      * @return array of UIDs
      */
@@ -161,16 +164,17 @@ class mailbox {
      * @param int    $uid               UID of the message that should be retrieved    
      * @param bool   $bodystr           On true fetches the bodystructure for the message and saves it in the message object
      * @param array  $add_headers       An array of strings containing names of additional headers (more than standard) that should be fetched
+     * @param bool   $readOnly          read-only mode
      *
      * @return object of class \bjc\roundcubeimap\message
      */
     
-    public function getMessage($uid, $bodystr = false, $add_headers = []) {
+    public function getMessage($uid, $bodystr = false, $add_headers = [], $readOnly = true) {
         
         $headers = ['message-id', 'uid', 'references'];
         $headers = array_unique(array_merge($headers, $add_headers));
         
-        $result = $this->rcube_imap_generic->fetchHeaders($this->mailboxname, $uid, true, $bodystr, $headers);
+        $result = $this->rcube_imap_generic->fetchHeaders($this->mailboxname, $uid, true, $bodystr, $headers, $readOnly);
         // Error on fetching message headers
         if($result === false) {
             return null;
