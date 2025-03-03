@@ -2465,14 +2465,15 @@ class rcube_imap_generic
      * @param array  $query_items FETCH command data items
      * @param string $mod_seq     Modification sequence for CHANGEDSINCE (RFC4551) query
      * @param bool   $vanished    Enables VANISHED parameter (RFC5162) for CHANGEDSINCE query
+     * @param bool   $readOnly    Selecting read-only mode
      *
      * @return array List of rcube_message_header elements, False on error
      * @since 0.6
      */
     public function fetch($mailbox, $message_set, $is_uid = false, $query_items = [],
-        $mod_seq = null, $vanished = false)
+        $mod_seq = null, $vanished = false, $readOnly = true)
     {
-        if (!$this->select($mailbox)) {
+        if (!$this->select($mailbox, null, $readOnly)) {
             return false;
         }
 
@@ -2673,10 +2674,11 @@ class rcube_imap_generic
      * @param bool   $is_uid      True if $message_set contains UIDs
      * @param bool   $bodystr     Enable to add BODYSTRUCTURE data to the result
      * @param array  $add_headers List of additional headers
+     * @param bool   $readOnly    Selecting read-only mode
      *
      * @return bool|array List of rcube_message_header elements, False on error
      */
-    public function fetchHeaders($mailbox, $message_set, $is_uid = false, $bodystr = false, $add_headers = [])
+    public function fetchHeaders($mailbox, $message_set, $is_uid = false, $bodystr = false, $add_headers = [], $readOnly = true)
     {
         $query_items = ['UID', 'RFC822.SIZE', 'FLAGS', 'INTERNALDATE'];
         $headers     = ['DATE', 'FROM', 'TO', 'SUBJECT', 'CONTENT-TYPE', 'CC', 'REPLY-TO',
@@ -2693,7 +2695,7 @@ class rcube_imap_generic
 
         $query_items[] = 'BODY.PEEK[HEADER.FIELDS (' . implode(' ', $headers) . ')]';
 
-        return $this->fetch($mailbox, $message_set, $is_uid, $query_items);
+        return $this->fetch($mailbox, $message_set, $is_uid, $query_items, null, false, $readOnly);
     }
 
     /**
