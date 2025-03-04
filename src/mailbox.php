@@ -152,7 +152,7 @@ class mailbox {
 
     public function searchByCriteria($criteria = '', $return_uid = true, $readOnly = true):array
     {
-        $result = $this->rcube_imap_generic->search($this->mailboxname, $criteria, $return_uid, $readOnly);
+        $result = $this->rcube_imap_generic->search($this->mailboxname, $criteria, $return_uid, [], $readOnly);
 
         return $result->get();
 
