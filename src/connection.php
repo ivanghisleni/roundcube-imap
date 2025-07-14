@@ -38,13 +38,17 @@ class connection {
      * @return array containing objects of class \bjc\roundcubeimap\mailbox
      */
     
-    public function getMailboxes() {
-        
+    public function getMailboxes($skipFolders = ['Drafts', 'Draft', 'Bozze', 'Junk', 'Junk Email', 'Posta indesiderata', 'Spam']) {
+
         $mailboxes = $this->rcube_imap_generic->listMailboxes('', '*');
 
         $returnarray = array();
         
         foreach ($mailboxes as $mailboxname) {
+            // Skip unwanted folders
+            if(in_array(strtolower($mailboxname), array_map('strtolower',$skipFolders))) {
+                continue;
+            }
             $returnarray[] = new \bjc\roundcubeimap\mailbox($mailboxname, $this->rcube_imap_generic, $this->connection_data);
         }
         
