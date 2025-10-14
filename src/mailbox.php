@@ -366,8 +366,9 @@ class mailbox {
         $uidvalidity = (int) $status_object->uidvalidity;
         $highestmodseq = (int) $status_object->highestmodseq;
         
-        $stored_highestmodseq = (int) $stored_highestmodseq;
-        $stored_uidvalidity = (int) $stored_uidvalidity;
+//        $stored_highestmodseq = (int) $stored_highestmodseq;
+//        $stored_uidvalidity = (int) $stored_uidvalidity;
+
 
         $returnvalue = true;
         
