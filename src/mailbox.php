@@ -369,6 +369,7 @@ class mailbox {
 //        $stored_highestmodseq = (int) $stored_highestmodseq;
 //        $stored_uidvalidity = (int) $stored_uidvalidity;
 
+
         $returnvalue = true;
         
         if (!$qresync && !$condstore) {

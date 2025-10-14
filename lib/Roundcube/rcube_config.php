@@ -256,6 +256,7 @@ class rcube_config
 //            ini_set('error_log', $error_log);
 //        }
 
+
         // set default screen layouts
         $this->prop['supported_layouts'] = ['widescreen', 'desktop', 'list'];
 
