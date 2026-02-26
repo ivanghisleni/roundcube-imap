@@ -58,6 +58,8 @@ class utils {
                         $rangeStart = $rangeStartAndEnd[0];
                         $rangeEnd = $rangeStartAndEnd[1];
 
+                        echo "Messages range to process: ". $rangeStart. " - " . $rangeEnd.PHP_EOL;
+
                         if (preg_match('/^[0-9]+$/', $rangeStart) > 0 and preg_match('/^[0-9]+$/', $rangeEnd) > 0) {
 
                             $i = $rangeStart;
