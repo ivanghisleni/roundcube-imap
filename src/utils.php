@@ -39,41 +39,48 @@ class utils {
         return $emailaddress;
         
     }
-    
-    public static function decodeMessageRanges($rangestring) {
-        
-        $uidarray = array();
-        
-        $rangearray = explode(",", $rangestring);
-        
-        foreach ($rangearray as $rangeitem) {
-            if (preg_match('/^[0-9]+$/', $rangeitem) > 0) {
-                $uidarray[] = $rangeitem;
-            } else {
-                if(!empty($rangeitem)) {
 
-                    $rangestartandend = explode(':', $rangeitem);
-                    $rangestart = $rangestartandend[0];
-                    $rangeend = $rangestartandend[1];
+    public static function decodeMessageRanges($rangeAsString)
+    {
 
-                    if (preg_match('/^[0-9]+$/', $rangestart) > 0 and preg_match('/^[0-9]+$/', $rangeend) > 0) {
+        try {
 
-                        $i = $rangestart;
+            $uidArray = array();
+            $rangeArray = explode(",", $rangeAsString);
 
-                        while ($i <= $rangeend) {
-                            $uidarray[] = $i;
+            foreach ($rangeArray as $rangeItem) {
+                if (preg_match('/^[0-9]+$/', $rangeItem) > 0) {
+                    $uidArray[] = $rangeItem;
+                } else {
+                    if (!empty($rangeItem)) {
 
-                            $i++;
+                        $rangeStartAndEnd = explode(':', $rangeItem);
+                        $rangeStart = $rangeStartAndEnd[0];
+                        $rangeEnd = $rangeStartAndEnd[1];
+
+                        if (preg_match('/^[0-9]+$/', $rangeStart) > 0 and preg_match('/^[0-9]+$/', $rangeEnd) > 0) {
+
+                            $i = $rangeStart;
+
+                            while ($i <= $rangeEnd) {
+                                $uidArray[] = $i;
+                                $i++;
+                            }
+
                         }
-
                     }
+
                 }
-                
+
             }
-            
+
+            return $uidArray;
+
+        } finally {
+            unset($uidArray);
+            gc_enable();
+            gc_collect_cycles();
         }
-        
-        return $uidarray;
     }
     
     
