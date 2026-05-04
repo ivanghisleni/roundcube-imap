@@ -288,10 +288,20 @@ class mailbox {
                 $vanishedrange = $this->rcube_imap_generic->data['VANISHED'];
             }
 
-            $returnarray["messagearray"] = $messagearray;
-            $returnarray["vanishedarray"] = \bjc\roundcubeimap\utils::decodeMessageRanges($vanishedrange);
-            $returnarray["vanishedrange"] = $vanishedrange;
-            $returnarray["status"] = 1;
+//            utils.php OLD way with generator
+//            $returnarray["messagearray"] = $messagearray;
+//            $returnarray["vanishedarray"] = \bjc\roundcubeimap\utils::decodeMessageRanges($vanishedrange);
+//            $returnarray["vanishedrange"] = $vanishedrange;
+//            $returnarray["status"] = 1;
+
+//          utils.php NEW way with generator
+            $returnarray["messagearray"]   = $messagearray;
+            $returnarray["vanishedarray"]  = \bjc\roundcubeimap\utils::decodeMessageRanges($vanishedrange);
+            $returnarray["vanishedcount"]  = \bjc\roundcubeimap\utils::countMessageRanges($vanishedrange);
+            $returnarray["hasvanished"]    = $vanishedrange !== '';
+            $returnarray["vanishedrange"]  = $vanishedrange;
+            $returnarray["status"]         = 1;
+
             
         }
         

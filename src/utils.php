@@ -2,90 +2,162 @@
 
 namespace bjc\roundcubeimap;
 
-class utils {
-   
-    public static function decodeAddresslist($addresslist) {
-        
+class utils
+{
+
+    public static function decodeAddresslist($addresslist)
+    {
+
         $addressarray = \rcube_mime::decode_address_list($addresslist);
-        
+
         $returnarray = array();
-        
+
         foreach ($addressarray as $address_key => $address_item) {
             $name = $address_item["name"];
             $address = $address_item["mailto"];
-            
+
             $emailaddress = new \bjc\roundcubeimap\emailaddress($address, null, null, $name);
-            
+
             $returnarray[] = $emailaddress;
-            
+
         }
-        
+
         return $returnarray;
-        
+
     }
-    
-    public static function decodeAddress($addressinput) {
-        
+
+    public static function decodeAddress($addressinput)
+    {
+
         $addressarray = \rcube_mime::decode_address_list($addressinput);
-        
+
         $returnarray = array();
-        
+
         $address_item = reset($addressarray);
         $name = $address_item["name"];
         $address = $address_item["mailto"];
-            
+
         $emailaddress = new \bjc\roundcubeimap\emailaddress($address, null, null, $name);
-            
+
         return $emailaddress;
-        
+
     }
 
-    public static function decodeMessageRanges($rangeAsString)
+//    OLD WAY
+//    public static function decodeMessageRanges($rangeAsString)
+//    {
+//
+//        try {
+//
+//            $uidArray = array();
+//            $rangeArray = explode(",", $rangeAsString);
+//
+//            foreach ($rangeArray as $rangeItem) {
+//                if (preg_match('/^[0-9]+$/', $rangeItem) > 0) {
+//                    $uidArray[] = $rangeItem;
+//                } else {
+//                    if (!empty($rangeItem)) {
+//
+//                        $rangeStartAndEnd = explode(':', $rangeItem);
+//                        $rangeStart = intval($rangeStartAndEnd[0]);
+//                        $rangeEnd = intval($rangeStartAndEnd[1]);
+//                        $range = $rangeEnd - $rangeStart;
+//
+//                        var_dump(sprintf("Messages range to process: %d - %d, total: %d" . PHP_EOL, $rangeStart, $rangeEnd, $range));
+//                        if ($range > 1500000) {
+//                            echo "Messages range more 1500000, Skip." . PHP_EOL;
+//                            //return [];
+//                            $rangeEnd = $rangeStart + 1500000;
+//                        }
+//
+//                        if (preg_match('/^[0-9]+$/', $rangeStart) > 0 and preg_match('/^[0-9]+$/', $rangeEnd) > 0) {
+//                            $i = $rangeStart;
+//                            while ($i <= $rangeEnd) {
+//                                $uidArray[] = $i;
+//                                $i++;
+//                            }
+//                        }
+//                    }
+//
+//                }
+//
+//            }
+//
+//            return $uidArray;
+//
+//        } finally {
+//            unset($uidArray);
+//            gc_enable();
+//            gc_collect_cycles();
+//        }
+//    }
+
+// NEW WAY with generator
+    public static function decodeMessageRanges(string $rangeAsString): \Generator
     {
+        foreach (explode(',', $rangeAsString) as $rangeItem) {
+            $rangeItem = trim($rangeItem);
+            if ($rangeItem === '') continue;
 
-        try {
-
-            $uidArray = array();
-            $rangeArray = explode(",", $rangeAsString);
-
-            foreach ($rangeArray as $rangeItem) {
-                if (preg_match('/^[0-9]+$/', $rangeItem) > 0) {
-                    $uidArray[] = $rangeItem;
-                } else {
-                    if (!empty($rangeItem)) {
-
-                        $rangeStartAndEnd = explode(':', $rangeItem);
-                        $rangeStart = $rangeStartAndEnd[0];
-                        $rangeEnd = $rangeStartAndEnd[1];
-
-                        echo "Messages range to process: ". $rangeStart. " - " . $rangeEnd.PHP_EOL;
-
-                        if (preg_match('/^[0-9]+$/', $rangeStart) > 0 and preg_match('/^[0-9]+$/', $rangeEnd) > 0) {
-
-                            $i = $rangeStart;
-
-                            while ($i <= $rangeEnd) {
-                                $uidArray[] = $i;
-                                $i++;
-                            }
-
-                        }
-                    }
-
-                }
-
+            if (preg_match('/^\d+$/', $rangeItem)) {
+                yield (int)$rangeItem;
+                continue;
             }
 
-            return $uidArray;
+            if (!str_contains($rangeItem, ':')) continue;
 
-        } finally {
-            unset($uidArray);
-            gc_enable();
-            gc_collect_cycles();
+            [$startStr, $endStr] = explode(':', $rangeItem, 2);
+            $rangeStart = (int)$startStr;
+            $rangeEnd   = (int)$endStr;
+
+            if ($rangeStart <= 0 || $rangeEnd <= 0) continue;
+
+            if (($rangeEnd - $rangeStart) > 1_500_000) {
+                error_log(sprintf(
+                    '[decodeMessageRanges] Large VANISHED range detected: %d:%d (total: %d), possible sync issue.',
+                    $rangeStart, $rangeEnd, $rangeEnd - $rangeStart
+                ));
+            }
+
+            for ($i = $rangeStart; $i <= $rangeEnd; $i++) {
+                yield $i;
+            }
         }
     }
-    
-    
-    
-    
+
+    public static function countMessageRanges(string $rangeAsString): int
+    {
+        $total = 0;
+
+        foreach (explode(',', $rangeAsString) as $rangeItem) {
+            $rangeItem = trim($rangeItem);
+            if ($rangeItem === '') continue;
+
+            if (preg_match('/^\d+$/', $rangeItem)) {
+                $total++;
+                continue;
+            }
+
+            if (!str_contains($rangeItem, ':')) continue;
+
+            [$startStr, $endStr] = explode(':', $rangeItem, 2);
+            $rangeStart = (int)$startStr;
+            $rangeEnd   = (int)$endStr;
+
+            if ($rangeStart <= 0 || $rangeEnd <= 0) continue;
+
+            if (($rangeEnd - $rangeStart) > 1_500_000) {
+                error_log(sprintf(
+                    '[countMessageRanges] Large VANISHED range detected: %d:%d (total: %d), possible sync issue.',
+                    $rangeStart, $rangeEnd, $rangeEnd - $rangeStart
+                ));
+            }
+
+            $total += ($rangeEnd - $rangeStart + 1);
+        }
+
+        return $total;
+    }
+
+
 }
