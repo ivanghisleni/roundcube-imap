@@ -198,6 +198,14 @@ $status = $mailbox->getStatus();
 $highestmodseq = $status->highestmodseq;
 ```
 
+##### ⚠️ Breaking Change in v0.2.0
+> **Note:** Starting from v0.2.0, the `synchronize()` method returns a **Generator** for the `vanishedarray` field instead of a plain array.
+> This change improves memory efficiency when handling large ranges of deleted messages (e.g., `VANISHED 1:5000000`).
+> **Migration:** If your code expects `vanishedarray` to be an array, wrap it with `iterator_to_array()`:
+> ```php
+> $vanishedarray = iterator_to_array($synchronize_result["vanishedarray"]);
+> ```
+
 To get the changes since last synchronization run:
 
 ```php
@@ -215,17 +223,24 @@ foreach ($messagearray as $message) {
 }
 
 // get array of vanished (deleted) messages
+// NOTE: $vanishedarray is now a Generator to handle large ranges efficiently (memory-safe)
+// Use foreach to iterate or convert to array if needed: iterator_to_array($vanishedarray)
 $vanishedarray = $synchronize_result["vanishedarray"];
 
 foreach ($vanishedarray as $uid) {
   // uid is the uid of the deleted message
 }
 
+// Additional synchronization info:
+$vanishedcount = $synchronize_result["vanishedcount"];  // Total count of vanished messages
+$hasvanished = $synchronize_result["hasvanished"];      // Boolean: true if there are vanished messages
+$vanishedrange = $synchronize_result["vanishedrange"];  // Original range string from server
+
 ```
 
 If you plan to analyse the bodystructure of the e-mails you already can request the bodystructure to be fetched (and stored in the message object) by setting the third variable of the function call to true:
 ```php
-$messagearray = $mailbox->synchronize($stored_highestmodseq, $stored_uidvalidity, true);
+$synchronize_result = $mailbox->synchronize($stored_highestmodseq, $stored_uidvalidity, true);
 ```
 Anyway the message object will take care of fetching the bodystructure later if needed but not yet stored in the message object.
 

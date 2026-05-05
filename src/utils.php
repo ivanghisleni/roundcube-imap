@@ -5,6 +5,12 @@ namespace bjc\roundcubeimap;
 class utils
 {
 
+    /**
+     * Decodes a list of email addresses into an array of EmailAddress objects
+     *
+     * @param string $addresslist Comma-separated list of email addresses
+     * @return array Array of \bjc\roundcubeimap\emailaddress objects
+     */
     public static function decodeAddresslist($addresslist)
     {
 
@@ -26,6 +32,12 @@ class utils
 
     }
 
+    /**
+     * Decodes a single email address string into an EmailAddress object
+     *
+     * @param string $addressinput Email address string (e.g., "John Doe <john@example.com>")
+     * @return \bjc\roundcubeimap\emailaddress EmailAddress object
+     */
     public static function decodeAddress($addressinput)
     {
 
@@ -92,7 +104,13 @@ class utils
 //        }
 //    }
 
-// NEW WAY with generator
+    /**
+     * Decodes a message range string into a Generator that yields individual UIDs
+     * This method is memory-efficient as it generates UIDs on-demand rather than loading all into an array
+     *
+     * @param string $rangeAsString Message range string (e.g., "1:10,15,20:30")
+     * @return \Generator<int> Generator that yields individual UIDs
+     */
     public static function decodeMessageRanges(string $rangeAsString): \Generator
     {
         foreach (explode(',', $rangeAsString) as $rangeItem) {
@@ -125,6 +143,12 @@ class utils
         }
     }
 
+    /**
+     * Counts the total number of UIDs in a message range string without loading them all into memory
+     *
+     * @param string $rangeAsString Message range string (e.g., "1:10,15,20:30")
+     * @return int Total count of UIDs in the range
+     */
     public static function countMessageRanges(string $rangeAsString): int
     {
         $total = 0;
