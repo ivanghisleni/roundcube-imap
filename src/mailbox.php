@@ -624,5 +624,15 @@ class mailbox {
         return $result;
         
     }
+
+    /**
+     * Returns the LIST attributes for this mailbox (e.g. ['\Noselect', '\HasNoChildren'])
+     *
+     * @return array
+     */
+    public function getAttributes(): array
+    {
+        return $this->rcube_imap_generic->data['LIST'][$this->mailboxname] ?? [];
+    }
         
 }
