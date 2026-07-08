@@ -174,4 +174,23 @@ class connection {
         return $hierarchyDelimiter;
     }
 
+    /**
+     * Sends the IMAP ID command (RFC 2971) to identify the client and retrieve
+     * the server identification (e.g. NAME, VERSION, RELEASE)
+     *
+     * @param array $clientId Client identification key/value pairs to send
+     *
+     * @return array|false Server identification key/value hash, false if the server
+     *                      does not support the ID capability or on error
+     */
+    public function getServerId(array $clientId = ['name' => 'roundcube-imap']) {
+
+        if (!$this->rcube_imap_generic->getCapability('ID')) {
+            return false;
+        }
+
+        return $this->rcube_imap_generic->id($clientId);
+
+    }
+
 }
