@@ -1,1 +1,24 @@
+# IDE
 .idea
+
+# AI assistants
+.claude
+CLAUDE.md
+.cursor
+.cursorrules
+.cursorignore
+.windsurf
+.windsurfrules
+.codex
+AGENTS.md
+.gemini
+GEMINI.md
+.github/copilot-instructions.md
+.aider*
+.continue
+.cline
+.clinerules
+.roo
+.roomodes
+.junie
+.kiro
