@@ -1223,15 +1223,14 @@ class rcube_imap_generic
             $params[] = ['QRESYNC', $qresync_data];
         }
 
-        // Selecting mailbox with `EXAMINE\SELECT` based only $readOnly
-        $selectCommand = $readOnly ? 'EXAMINE' : 'SELECT';
+        // Open the mailbox read-only (EXAMINE) unless a read-write selection is requested
+        list($code, $response) = $this->execute($readOnly ? 'EXAMINE' : 'SELECT', $params);
 
-        list($code, $response) = $this->execute($selectCommand, $params);
-
-        // Error selecting mailbox with `EXAMINE\SELECT` retry with `SELECT\EXAMINE`
-        if($code !== self::ERROR_OK) {
-            $selectCommand = !$readOnly ? 'EXAMINE' : 'SELECT';
-            list($code, $response) = $this->execute($selectCommand, $params);
+        // A server refusing EXAMINE may still accept SELECT. The opposite fallback is
+        // deliberately not done: a caller asking for read-write must not silently get
+        // a read-only mailbox, the later STORE/EXPUNGE would fail with a less clear error.
+        if ($readOnly && $code !== self::ERROR_OK) {
+            list($code, $response) = $this->execute('SELECT', $params);
         }
 
         if ($code == self::ERROR_OK) {
