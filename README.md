@@ -45,10 +45,32 @@ foreach ($mailboxes as $mailbox) {
 
 ```
 
+By default Drafts and Junk folders are left out. Since 0.4.0 they are recognised by their RFC 6154 special-use attribute (`\Drafts`, `\Junk`) on servers that implement it, whatever the folder is called; a list of well-known English and Italian names is kept as fallback. Both lists are parameters and can be replaced or disabled:
+
+```php
+// skip also Trash and Sent, by attribute
+$mailboxes = $connection->getMailboxes([], ['\\Junk', '\\Drafts', '\\Trash', '\\Sent']);
+
+// no skipping at all
+$mailboxes = $connection->getMailboxes([], []);
+```
+
 Or retrieve a specific mailbox:
 
 ```php
 $mailbox = $connection->getMailbox('INBOX');
+```
+
+#### Attributes of a mailbox
+
+The attributes returned by the IMAP LIST command are available on the mailbox object. They include `\Noselect` (the mailbox cannot be opened), `\HasChildren`/`\HasNoChildren` and, when the server implements RFC 6154, the special-use role `\Junk`, `\Drafts`, `\Sent`, `\Trash`, `\Archive`, `\All`, `\Flagged`:
+
+```php
+$attributes = $mailbox->getAttributes(); // e.g. ['\\HasNoChildren', '\\Junk']
+
+if ($mailbox->hasAttribute('\\Noselect')) {
+  // cannot be selected, skip it
+}
 ```
 
 Create a mailbox:

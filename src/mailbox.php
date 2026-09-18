@@ -626,13 +626,33 @@ class mailbox {
     }
 
     /**
-     * Returns the LIST attributes for this mailbox (e.g. ['\Noselect', '\HasNoChildren'])
+     * Returns the LIST attributes for this mailbox, e.g. ['\HasNoChildren', '\Junk']
+     * Attributes are taken from the LIST response cached by connection::getMailboxes(); when the
+     * mailbox was opened directly with connection::getMailbox() a LIST for this single mailbox is
+     * issued once to get them. Special-use attributes (RFC 6154: \Junk, \Drafts, \Sent, \Trash,
+     * \Archive, \All, \Flagged) are only present when the server implements them.
      *
      * @return array
      */
     public function getAttributes(): array
     {
+        if (!isset($this->rcube_imap_generic->data['LIST'][$this->mailboxname])) {
+            $this->rcube_imap_generic->listMailboxes('', $this->mailboxname);
+        }
+
         return $this->rcube_imap_generic->data['LIST'][$this->mailboxname] ?? [];
+    }
+
+    /**
+     * Returns true if the mailbox has the given LIST attribute (case-insensitive), e.g. '\Noselect' or '\Junk'
+     *
+     * @param string $attribute
+     *
+     * @return bool
+     */
+    public function hasAttribute(string $attribute): bool
+    {
+        return in_array(strtolower($attribute), array_map('strtolower', $this->getAttributes()), true);
     }
         
 }
