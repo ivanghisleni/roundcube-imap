@@ -36,13 +36,6 @@ class server {
 
         $rcube_imap_generic = new \bjc\roundcubeimap\imap_generic();
 
-//        $result_connect = $rcube_imap_generic->connect($this->host, $username, $password, array(
-//                'ssl_mode' => $this->ssl_mode,
-//                //'auth_type' => 'GSSAPI',
-//                'port'=>993)
-//        );
-//        $result_connect = $rcube_imap_generic->connect($this->host, $username, $password, array('ssl_mode' => $this->ssl_mode));
-
         $options = array_merge(['ssl_mode' => $this->ssl_mode], $options);
         $result_connect = $rcube_imap_generic->connect($this->host, $username, $password, $options);
 
