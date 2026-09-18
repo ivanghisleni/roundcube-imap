@@ -1199,8 +1199,12 @@ class rcube_imap_generic
             return false;
         }
 
+        // Reuse the current selection unless a read-write selection is requested
+        // on a mailbox that was opened with EXAMINE (read-only)
         if ($this->selected === $mailbox) {
-            return true;
+            if ($readOnly || !empty($this->data['READ-WRITE'])) {
+                return true;
+            }
         }
 
         $params = [$this->escape($mailbox)];
@@ -1375,7 +1379,7 @@ class rcube_imap_generic
      */
     public function expunge($mailbox, $messages = null)
     {
-        if (!$this->select($mailbox)) {
+        if (!$this->select($mailbox, null, false)) {
             return false;
         }
 
@@ -2331,7 +2335,7 @@ class rcube_imap_generic
             return false;
         }
 
-        if (!$this->select($mailbox)) {
+        if (!$this->select($mailbox, null, false)) {
             return false;
         }
 
@@ -2409,7 +2413,7 @@ class rcube_imap_generic
      */
     public function move($messages, $from, $to)
     {
-        if (!$this->select($from)) {
+        if (!$this->select($from, null, false)) {
             return false;
         }
 
