@@ -141,18 +141,28 @@ class mailbox {
     }
 
     /**
-     * Expose: Executes SEARCH command by rcube_imap_generic
-     * @param string    $criteria       Criteria
-     * @param bool      $return_uid
+     * Executes the SEARCH command on this mailbox
+     * Throws exception on error (mailbox cannot be selected or server rejected the SEARCH)
+     *
+     * @param string    $criteria       Search criteria (RFC 3501 section 6.4.4), e.g. 'ALL', 'UID 1:100', 'SINCE 1-Jan-2024'
+     * @param bool      $return_uid     On true returns UIDs, otherwise sequence numbers
      * @param bool      $readOnly       Selecting read-only mode
      *
-     * @return array of UIDs
+     * @return array of UIDs (or sequence numbers)
      */
-
 
     public function searchByCriteria($criteria = '', $return_uid = true, $readOnly = true):array
     {
         $result = $this->rcube_imap_generic->search($this->mailboxname, $criteria, $return_uid, [], $readOnly);
+
+        if ($result->is_error()) {
+            throw new \Exception(sprintf(
+                'Search failed on mailbox %s: %s [%s]',
+                $this->mailboxname,
+                $this->rcube_imap_generic->error ?: 'unknown error',
+                $this->rcube_imap_generic->resultcode ?: 'no result code'
+            ));
+        }
 
         return $result->get();
 

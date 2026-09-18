@@ -444,6 +444,29 @@ $result = $message->deleteMessage();
 ```
 
 
+### Search messages
+
+Run an IMAP SEARCH (RFC 3501 section 6.4.4) on a mailbox and get back the matching UIDs:
+
+```php
+// returns an array of UIDs, throws \Exception if the mailbox cannot be selected or the server rejects the search
+$uids = $mailbox->searchByCriteria('SINCE 1-Jan-2024 BEFORE 1-Feb-2024');
+$uids = $mailbox->searchByCriteria('UID 1000:2000');
+
+// pass false as second parameter to get sequence numbers instead of UIDs
+$seqnums = $mailbox->searchByCriteria('UNSEEN', false);
+```
+
+The mailbox is opened read-only (EXAMINE) by default. Pass `false` as third parameter to open it read-write (SELECT), e.g. when the search is followed by flag changes or deletions on the same mailbox:
+
+```php
+$uids = $mailbox->searchByCriteria('BEFORE 1-Jan-2020', true, false);
+$mailbox->deleteMessages($uids);
+```
+
+The exception message carries the server response and its RFC 5530 response code, e.g. `Search failed on mailbox Shared/Team: SELECT: Permission denied [NOPERM]`.
+
+
 ### Count messages
 
 You can count all messages, recent messages or unseen messages in a mailbox object:
