@@ -55,55 +55,6 @@ class utils
 
     }
 
-//    OLD WAY
-//    public static function decodeMessageRanges($rangeAsString)
-//    {
-//
-//        try {
-//
-//            $uidArray = array();
-//            $rangeArray = explode(",", $rangeAsString);
-//
-//            foreach ($rangeArray as $rangeItem) {
-//                if (preg_match('/^[0-9]+$/', $rangeItem) > 0) {
-//                    $uidArray[] = $rangeItem;
-//                } else {
-//                    if (!empty($rangeItem)) {
-//
-//                        $rangeStartAndEnd = explode(':', $rangeItem);
-//                        $rangeStart = intval($rangeStartAndEnd[0]);
-//                        $rangeEnd = intval($rangeStartAndEnd[1]);
-//                        $range = $rangeEnd - $rangeStart;
-//
-//                        var_dump(sprintf("Messages range to process: %d - %d, total: %d" . PHP_EOL, $rangeStart, $rangeEnd, $range));
-//                        if ($range > 1500000) {
-//                            echo "Messages range more 1500000, Skip." . PHP_EOL;
-//                            //return [];
-//                            $rangeEnd = $rangeStart + 1500000;
-//                        }
-//
-//                        if (preg_match('/^[0-9]+$/', $rangeStart) > 0 and preg_match('/^[0-9]+$/', $rangeEnd) > 0) {
-//                            $i = $rangeStart;
-//                            while ($i <= $rangeEnd) {
-//                                $uidArray[] = $i;
-//                                $i++;
-//                            }
-//                        }
-//                    }
-//
-//                }
-//
-//            }
-//
-//            return $uidArray;
-//
-//        } finally {
-//            unset($uidArray);
-//            gc_enable();
-//            gc_collect_cycles();
-//        }
-//    }
-
     /**
      * Decodes a message range string into a Generator that yields individual UIDs
      * This method is memory-efficient as it generates UIDs on-demand rather than loading all into an array

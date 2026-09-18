@@ -298,13 +298,7 @@ class mailbox {
                 $vanishedrange = $this->rcube_imap_generic->data['VANISHED'];
             }
 
-//            utils.php OLD way with generator
-//            $returnarray["messagearray"] = $messagearray;
-//            $returnarray["vanishedarray"] = \bjc\roundcubeimap\utils::decodeMessageRanges($vanishedrange);
-//            $returnarray["vanishedrange"] = $vanishedrange;
-//            $returnarray["status"] = 1;
-
-//          utils.php NEW way with generator
+            // vanishedarray is a Generator (see utils::decodeMessageRanges), count is computed separately
             $returnarray["messagearray"]   = $messagearray;
             $returnarray["vanishedarray"]  = \bjc\roundcubeimap\utils::decodeMessageRanges($vanishedrange);
             $returnarray["vanishedcount"]  = \bjc\roundcubeimap\utils::countMessageRanges($vanishedrange);
@@ -385,10 +379,6 @@ class mailbox {
         
         $uidvalidity = (int) $status_object->uidvalidity;
         $highestmodseq = (int) $status_object->highestmodseq;
-        
-//        $stored_highestmodseq = (int) $stored_highestmodseq;
-//        $stored_uidvalidity = (int) $stored_uidvalidity;
-
 
         $returnvalue = true;
         

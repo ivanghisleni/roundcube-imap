@@ -245,16 +245,9 @@ class rcube_config
             }
         }
 
-//        // set PHP error logging according to config
-//        $error_log = $this->prop['log_driver'] ?: 'file';
-//        if ($error_log == 'file') {
-//            $error_log  = $this->prop['log_dir'] . '/errors';
-//            $error_log .= $this->prop['log_file_ext'] ?? '.log';
-//        }
-//
-//        if ($error_log && $error_log != 'stdout') {
-//            ini_set('error_log', $error_log);
-//        }
+        // Fork note: upstream redirects PHP's error_log to <log_dir>/errors.log here.
+        // Removed on purpose: this library is embedded in other applications and must
+        // not hijack the host application's error logging.
 
 
         // set default screen layouts
