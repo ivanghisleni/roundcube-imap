@@ -35,21 +35,45 @@ class connection {
     /**
      * Get all mailboxes of the account the connection is established to
      *
+     * A mailbox is skipped when its full name is in $skipFolders (case-insensitive) or when it
+     * carries one of the LIST attributes in $skipAttributes (case-insensitive). The attribute check
+     * relies on RFC 6154 SPECIAL-USE and works whatever the folder is called; the name list is the
+     * fallback for servers that do not implement it. Pass [] to disable either check.
+     *
+     * @param array $skipFolders    Mailbox names to skip
+     * @param array $skipAttributes LIST attributes to skip, e.g. ['\Junk', '\Drafts', '\Trash']
+     *
      * @return array containing objects of class \bjc\roundcubeimap\mailbox
      */
     
-    public function getMailboxes($skipFolders = ['Drafts', 'Draft', 'Bozze', 'Junk', 'Junk Email', 'Posta indesiderata', 'Spam']) {
+    public function getMailboxes($skipFolders = ['Drafts', 'Draft', 'Bozze', 'Junk', 'Junk Email', 'Posta indesiderata', 'Spam'], array $skipAttributes = ['\\Junk', '\\Drafts']) {
 
-        $mailboxes = $this->rcube_imap_generic->listMailboxes('', '*');
+        // Ask for special-use attributes explicitly where the server supports the extended LIST syntax;
+        // servers implementing SPECIAL-USE usually include them in a plain LIST anyway
+        $return_opts = $this->rcube_imap_generic->getCapability('SPECIAL-USE') ? ['SPECIAL-USE'] : [];
+
+        $mailboxes = $this->rcube_imap_generic->listMailboxes('', '*', $return_opts);
+
+        $skipFolders = array_map('strtolower', $skipFolders);
 
         $returnarray = array();
         
         foreach ($mailboxes as $mailboxname) {
-            // Skip unwanted folders
-            if(in_array(strtolower($mailboxname), array_map('strtolower',$skipFolders))) {
+            // Skip unwanted folders by name
+            if (in_array(strtolower($mailboxname), $skipFolders, true)) {
                 continue;
             }
-            $returnarray[] = new \bjc\roundcubeimap\mailbox($mailboxname, $this->rcube_imap_generic, $this->connection_data);
+
+            $mailbox = new \bjc\roundcubeimap\mailbox($mailboxname, $this->rcube_imap_generic, $this->connection_data);
+
+            // Skip unwanted folders by special-use attribute
+            foreach ($skipAttributes as $attribute) {
+                if ($mailbox->hasAttribute($attribute)) {
+                    continue 2;
+                }
+            }
+
+            $returnarray[] = $mailbox;
         }
         
         return $returnarray;
