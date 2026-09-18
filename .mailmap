@@ -1,0 +1,12 @@
+# Canonical identities for git log/shortlog/blame.
+# Format: Proper Name <canonical@email> [Commit Name] <commit@email>
+
+Ivan Ghisleni <ivan.ghisleni@gmail.com> ivanghisleni <ivan.ghisleni@gmail.com>
+Ivan Ghisleni <ivan.ghisleni@gmail.com> Ivan Ghisleni <ivan.ghisleni@libraesva.com>
+Ivan Ghisleni <ivan.ghisleni@gmail.com> Ivan <ivan.ghisleni@libraesva.com>
+Ivan Ghisleni <ivan.ghisleni@gmail.com> Ivan <ivan.ghisleni@libracyber.com>
+Ivan Ghisleni <ivan.ghisleni@gmail.com> Ivan <ivan.ghileni@libracyber.com>
+Ivan Ghisleni <ivan.ghisleni@gmail.com> Ivan Ghisleni <ivanghisleni@Macbook-Air-work-di-Ivan.local>
+
+Benedikt Carda <carda@two-wings.net> benediktcarda <carda@two-wings.net>
+Benedikt Carda <carda@two-wings.net> Benedikt <carda@two-wings.net>
