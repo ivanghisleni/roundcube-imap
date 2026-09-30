@@ -16,11 +16,22 @@
 	"require" : {
 		"php" : ">=8.0"
 	},
+	"require-dev" : {
+		"phpunit/phpunit" : "^9.6"
+	},
 	"replace": {
     },
 	"autoload" : {
 		"psr-4" : {
 			"bjc\\roundcubeimap\\" : "src"
 		}
+	},
+	"autoload-dev" : {
+		"psr-4" : {
+			"bjc\\roundcubeimap\\tests\\" : "tests"
+		}
+	},
+	"scripts" : {
+		"test" : "phpunit"
 	}
 }

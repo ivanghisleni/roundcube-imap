@@ -550,5 +550,14 @@ $mailbox->appendMessage($mimemessage);
 
 ```
 
+## Tests
+
+```
+composer install
+composer test
+```
+
+The suite runs without an IMAP server: `tests/fake_imap_generic.php` scripts the capabilities and the LIST answer.
+
 ## To Do:
 * Create class \bjc\roundcubeimap\embeddedmessage to give a possibility to deal with embedded messages
