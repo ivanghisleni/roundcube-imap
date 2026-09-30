@@ -48,17 +48,30 @@ class connection {
     
     public function getMailboxes($skipFolders = ['Drafts', 'Draft', 'Bozze', 'Junk', 'Junk Email', 'Posta indesiderata', 'Spam'], array $skipAttributes = ['\\Junk', '\\Drafts']) {
 
-        // Ask for special-use attributes explicitly where the server supports the extended LIST syntax;
-        // servers implementing SPECIAL-USE usually include them in a plain LIST anyway
-        $return_opts = $this->rcube_imap_generic->getCapability('SPECIAL-USE') ? ['SPECIAL-USE'] : [];
+        // Ask for special-use attributes explicitly where the server supports the extended LIST syntax
+        // (RFC 6154 allows RETURN (SPECIAL-USE) only with LIST-EXTENDED); servers implementing
+        // SPECIAL-USE usually include them in a plain LIST anyway
+        $return_opts = $this->rcube_imap_generic->getCapability('SPECIAL-USE') && $this->rcube_imap_generic->getCapability('LIST-EXTENDED') ? ['SPECIAL-USE'] : [];
 
         $mailboxes = $this->rcube_imap_generic->listMailboxes('', '*', $return_opts);
+
+        if ($mailboxes === false) {
+            return array();
+        }
+
+        // With any RETURN option on a LIST-STATUS server, listMailboxes() returns name => status
+        // instead of a plain list of names (Dovecot); keep only the names either way
+        $mailboxnames = array();
+
+        foreach ($mailboxes as $key => $value) {
+            $mailboxnames[] = is_array($value) ? (string) $key : $value;
+        }
 
         $skipFolders = array_map('strtolower', $skipFolders);
 
         $returnarray = array();
         
-        foreach ($mailboxes as $mailboxname) {
+        foreach ($mailboxnames as $mailboxname) {
             // Skip unwanted folders by name
             if (in_array(strtolower($mailboxname), $skipFolders, true)) {
                 continue;
