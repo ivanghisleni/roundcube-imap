@@ -22,3 +22,8 @@ GEMINI.md
 .roomodes
 .junie
 .kiro
+
+# Composer / PHPUnit
+/vendor/
+/composer.lock
+/.phpunit.result.cache
