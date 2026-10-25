@@ -260,6 +260,16 @@ $vanishedrange = $synchronize_result["vanishedrange"];  // Original range string
 
 ```
 
+RFC 7162 lets a server answer `VANISHED (EARLIER)` with UIDs the client never saw (Zimbra, for instance, reports every non-existent UID below UIDNEXT), so `vanishedcount` can be far larger than the number of messages you actually knew. To keep only the UIDs you know, without expanding the ranges (the cost does not depend on how many UIDs a range spans), use `intersectMessageRanges()`:
+
+```php
+$knownuids = [3, 9864, 9865, 9870];  // UIDs your application stored for this mailbox
+$deleteduids = \bjc\roundcubeimap\utils::intersectMessageRanges($synchronize_result["vanishedrange"], $knownuids);
+// [3, 9864, 9870] for a vanishedrange of "1:9864,9870": ascending, without duplicates
+```
+
+Since v0.5.0, `vanishedarray`, `vanishedcount` and `intersectMessageRanges()` read a descending range such as `3000:2000` as RFC 3501 defines it, the same as `2000:3000`. Before, it yielded no UID and was counted as a negative number.
+
 If you plan to analyse the bodystructure of the e-mails you already can request the bodystructure to be fetched (and stored in the message object) by setting the third variable of the function call to true:
 ```php
 $synchronize_result = $mailbox->synchronize($stored_highestmodseq, $stored_uidvalidity, true);
