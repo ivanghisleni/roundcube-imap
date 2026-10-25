@@ -64,30 +64,7 @@ class utils
      */
     public static function decodeMessageRanges(string $rangeAsString): \Generator
     {
-        foreach (explode(',', $rangeAsString) as $rangeItem) {
-            $rangeItem = trim($rangeItem);
-            if ($rangeItem === '') continue;
-
-            if (preg_match('/^\d+$/', $rangeItem)) {
-                yield (int)$rangeItem;
-                continue;
-            }
-
-            if (!str_contains($rangeItem, ':')) continue;
-
-            [$startStr, $endStr] = explode(':', $rangeItem, 2);
-            $rangeStart = (int)$startStr;
-            $rangeEnd   = (int)$endStr;
-
-            if ($rangeStart <= 0 || $rangeEnd <= 0) continue;
-
-            if (($rangeEnd - $rangeStart) > 1_500_000) {
-                error_log(sprintf(
-                    '[decodeMessageRanges] Large VANISHED range detected: %d:%d (total: %d), possible sync issue.',
-                    $rangeStart, $rangeEnd, $rangeEnd - $rangeStart
-                ));
-            }
-
+        foreach (self::parseMessageRanges($rangeAsString, 'decodeMessageRanges') as [$rangeStart, $rangeEnd]) {
             for ($i = $rangeStart; $i <= $rangeEnd; $i++) {
                 yield $i;
             }
@@ -104,34 +81,93 @@ class utils
     {
         $total = 0;
 
+        foreach (self::parseMessageRanges($rangeAsString, 'countMessageRanges') as [$rangeStart, $rangeEnd]) {
+            $total += ($rangeEnd - $rangeStart + 1);
+        }
+
+        return $total;
+    }
+
+    /**
+     * Returns the given UIDs that fall within a message range string, without expanding the ranges:
+     * the cost depends on the number of ranges and UIDs, not on how many UIDs the ranges span, so
+     * "1:4294967295" costs as much as "1:10"
+     *
+     * Typical use: keep only the UIDs a client already knows out of a VANISHED (EARLIER) response,
+     * which RFC 7162 allows to list UIDs the client never saw
+     *
+     * @param string $rangeAsString Message range string (e.g., "1:10,15,20:30")
+     * @param array $uids UIDs to look up (int or numeric string)
+     * @return int[] UIDs found in the ranges, ascending, without duplicates
+     */
+    public static function intersectMessageRanges(string $rangeAsString, array $uids): array
+    {
+        $ranges = iterator_to_array(self::parseMessageRanges($rangeAsString, 'intersectMessageRanges'), false);
+        sort($ranges);
+
+        $uids = array_values(array_unique(array_map('intval', $uids)));
+        sort($uids);
+
+        // Both lists ascending: advance whichever one is behind
+        $found = [];
+        $rangeIndex = 0;
+        $uidIndex = 0;
+        while ($rangeIndex < count($ranges) AND $uidIndex < count($uids)) {
+            [$rangeStart, $rangeEnd] = $ranges[$rangeIndex];
+            $uid = $uids[$uidIndex];
+            if ($uid < $rangeStart) {
+                $uidIndex++;
+            } elseif ($uid > $rangeEnd) {
+                $rangeIndex++;
+            } else {
+                $found[] = $uid;
+                $uidIndex++;
+            }
+        }
+
+        return $found;
+    }
+
+    /**
+     * Parses a message range string into [start, end] pairs with start <= end: RFC 3501 lets a
+     * sequence set write a range either way round ("3000:2000" is 2000 to 3000)
+     *
+     * Items that are not a positive UID or a range of two positive UIDs (e.g. "*") are skipped
+     *
+     * @param string $rangeAsString Message range string (e.g., "1:10,15,20:30")
+     * @param string $caller Public method name, for the large-range diagnostic
+     * @return \Generator<array{int, int}>
+     */
+    private static function parseMessageRanges(string $rangeAsString, string $caller): \Generator
+    {
         foreach (explode(',', $rangeAsString) as $rangeItem) {
             $rangeItem = trim($rangeItem);
             if ($rangeItem === '') continue;
 
             if (preg_match('/^\d+$/', $rangeItem)) {
-                $total++;
+                if ((int)$rangeItem > 0) {
+                    yield [(int)$rangeItem, (int)$rangeItem];
+                }
                 continue;
             }
 
             if (!str_contains($rangeItem, ':')) continue;
 
             [$startStr, $endStr] = explode(':', $rangeItem, 2);
-            $rangeStart = (int)$startStr;
-            $rangeEnd   = (int)$endStr;
+            $rangeStart = min((int)$startStr, (int)$endStr);
+            $rangeEnd   = max((int)$startStr, (int)$endStr);
 
-            if ($rangeStart <= 0 || $rangeEnd <= 0) continue;
+            if ($rangeStart <= 0) continue;
 
             if (($rangeEnd - $rangeStart) > 1_500_000) {
                 error_log(sprintf(
-                    '[countMessageRanges] Large VANISHED range detected: %d:%d (total: %d), possible sync issue.',
-                    $rangeStart, $rangeEnd, $rangeEnd - $rangeStart
+                    '[%s] Large VANISHED range detected: %d:%d (total: %d), possible sync issue.',
+                    $caller, $rangeStart, $rangeEnd, $rangeEnd - $rangeStart
                 ));
             }
 
-            $total += ($rangeEnd - $rangeStart + 1);
+            yield [$rangeStart, $rangeEnd];
         }
-
-        return $total;
     }
 
 
