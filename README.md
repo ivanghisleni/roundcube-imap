@@ -423,6 +423,16 @@ Sometimes you need to get the full mime message to deal with it further.
 $mimemessage = $message->getMimemessage();
 ```
 
+### Retrieve only the header block
+
+When the headers are enough (a Message-ID, a hash of From/To/Date/Subject), `getMimeheader()` fetches `BODY.PEEK[HEADER]` instead of the whole message: a few KB even for a message of hundreds of MB, and the `\Seen` flag stays as it is.
+
+```php
+$header = $message->getMimeheader();
+```
+
+It returns the raw block as the server sent it (with the blank line ending it, when the message has one), `null` when the message is not on the server any more, and `false` on error: the folder cannot be selected, the server answers NO or BAD, or the connection drops before the response ends. A block cut short by a lost connection is never returned.
+
 ### Flag messages
 
 You can set and clear message flags within the mailbox object or within the message object:
@@ -567,7 +577,7 @@ composer install
 composer test
 ```
 
-The suite runs without an IMAP server: `tests/fake_imap_generic.php` scripts the capabilities and the LIST answer.
+The suite runs without an IMAP server: `tests/fake_imap_generic.php` scripts the capabilities and the LIST answer, `tests/scripted_imap_generic.php` plays scripted server answers through the real protocol code.
 
 ## To Do:
 * Create class \bjc\roundcubeimap\embeddedmessage to give a possibility to deal with embedded messages

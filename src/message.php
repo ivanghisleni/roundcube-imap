@@ -574,6 +574,22 @@ class message {
 
     }
 
+
+    /**
+     * Fetch the raw header block, without the body
+     *
+     * @param bool $readOnly Selecting read-only mode
+     *
+     * @return string|null|false header block as sent (blank line included), null when the message is not on
+     *                           the server any more, false on error
+     */
+
+    public function getMimeheader($readOnly = true): string|null|false {
+
+        return $this->rcube_imap_generic->fetchMimeheader($this->mailboxname, $this->uid, $readOnly);
+
+    }
+
     
     /**
      * Evaluates bodystructure and saves results in this object
